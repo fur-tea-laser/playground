@@ -1,8 +1,9 @@
-#include <quickjs/quickjs.h>
-#include <quickjs/quickjs-libc.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <math.h>
+#include <quickjs/quickjs.h>
+#include <quickjs/quickjs-libc.h>
 #include "./shared/PngEncoding.h"
 #include "./shared/PngPixels.h"
 
@@ -13,6 +14,7 @@ typedef struct {
 	uint8_t* frameEncoding;
 	uint16_t framePixelResolution;
   uint16_t frameIndex;
+  double fieldOfViewAngle;
 } FrameState;
 
 static void freeBufferData(
@@ -36,6 +38,36 @@ static JSValue js_getFrameCellBuffer(
 	uint32_t bufferSize = FRAME_CELL_SIZE * frameCellCount;
 	void* bufferData = malloc(bufferSize);
 	return JS_NewArrayBuffer(jsContext, bufferData, bufferSize, freeBufferData, NULL, 0);	
+}
+
+void renderCellPixel(
+	Rgb8bitPngPixels* framePixels,
+	U16 framePixelResolution,
+	S64 cellPixelX,
+	S64 cellPixelY,
+	U8 cellPixelRed,
+	U8 cellPixelGreen,
+	U8 cellPixelBlue
+) {
+	if (
+		cellPixelX >= 0 &&
+		cellPixelX < framePixelResolution &&
+		cellPixelY >= 0 &&
+		cellPixelY < framePixelResolution
+	) {
+		Rgb8bitPixelChannels* currentPixelChannels =
+			atPixelsDataPixelChannels(
+				framePixels,
+				cellPixelX,
+				cellPixelY
+			);
+		currentPixelChannels->red =
+			cellPixelRed;
+		currentPixelChannels->green =
+			cellPixelGreen;
+		currentPixelChannels->blue =
+			cellPixelBlue;
+	}
 }
 
 JSValue js_renderFrameCells(
@@ -62,11 +94,125 @@ JSValue js_renderFrameCells(
 					pixelColumnIndex,
 					pixelRowIndex
 				);
-			currentPixelChannels->red = 255;
+			currentPixelChannels->red = 0;
 			currentPixelChannels->green = 0;
 			currentPixelChannels->blue = 0;
 		}
 	}
+  // transform frame cells
+  size_t bufferSize;
+	uint8_t* bufferData = JS_GetArrayBuffer(jsContext, &bufferSize, argv[0]);
+	size_t cellCount = bufferSize / FRAME_CELL_SIZE;
+	uint32_t cellByteOffset;
+	double centerX, centerY, centerZ, halfRoot;
+	uint8_t frameColorRed, frameColorGreen, frameColorBlue;
+	int cellPixelCenterX, cellPixelCenterY, cellPixelX, cellPixelY;
+	uint32_t cellPixelHalfRoot;
+	double cellScalar = frameState->framePixelResolution / 2;
+	double fieldOfViewScalar, scalarX, scalarY, scaledX, scaledY, scaledHalfRoot, clippingW;
+	for (size_t cellIndex = 0; cellIndex < cellCount; cellIndex++) {
+		cellByteOffset = FRAME_CELL_SIZE * cellIndex;
+		centerX = *(double*)(bufferData + cellByteOffset);
+		centerY = *(double*)(bufferData + cellByteOffset + 8);
+		centerZ = *(double*)(bufferData + cellByteOffset + 16);
+		halfRoot = *(double*)(bufferData + cellByteOffset + 24);
+		frameColorRed = *(uint8_t*)(bufferData + cellByteOffset + 32);
+		frameColorGreen = *(uint8_t*)(bufferData + cellByteOffset + 33);
+		frameColorBlue = *(uint8_t*)(bufferData + cellByteOffset + 34);
+		fieldOfViewScalar = tan(frameState->fieldOfViewAngle / 2);
+		scalarY = 1 / fieldOfViewScalar;
+		scalarX = 1 / fieldOfViewScalar;
+		scaledX = centerX * scalarX;
+		scaledY = centerY * scalarY;
+		scaledHalfRoot = halfRoot * scalarY;
+		clippingW = -centerZ;
+		scaledX = scaledX / clippingW;
+		scaledY = scaledY / clippingW;
+		scaledHalfRoot = scaledHalfRoot / clippingW;
+		cellPixelCenterX =
+			(int)round(cellScalar * (scaledX + 1));
+		cellPixelCenterY =
+			(int)round(cellScalar * (scaledY + 1));
+		cellPixelHalfRoot =
+			(uint32_t)(cellScalar * scaledHalfRoot);
+		cellPixelX = cellPixelCenterX;
+		cellPixelY = cellPixelCenterY;
+		renderCellPixel(
+			frameState->framePixels,
+			frameState->framePixelResolution,
+			cellPixelX,
+			cellPixelY,
+			frameColorRed,
+			frameColorGreen,
+			frameColorBlue
+		);
+		for (
+			uint32_t halfRootIndex = 0;
+			halfRootIndex < cellPixelHalfRoot;
+			halfRootIndex++
+		) {
+			uint32_t pixelSideLength = 2 * halfRootIndex;
+			for (
+				uint32_t sideIndex = 0;
+				sideIndex < pixelSideLength;
+				sideIndex++
+			) {
+				cellPixelX = 
+					cellPixelCenterX - halfRootIndex + sideIndex;
+				cellPixelY = 
+					cellPixelCenterY - halfRootIndex;
+				renderCellPixel(
+					frameState->framePixels,
+					frameState->framePixelResolution,
+					cellPixelX,
+					cellPixelY,
+					frameColorRed,
+					frameColorGreen,
+					frameColorBlue
+				);
+				cellPixelX =
+					cellPixelCenterX + halfRootIndex;
+				cellPixelY =
+					cellPixelCenterY - halfRootIndex + sideIndex;
+				renderCellPixel(
+					frameState->framePixels,
+					frameState->framePixelResolution,
+					cellPixelX,
+					cellPixelY,
+					frameColorRed,
+					frameColorGreen,
+					frameColorBlue
+				);
+				cellPixelX =
+					cellPixelCenterX - halfRootIndex + sideIndex + 1;
+				cellPixelY =
+					cellPixelCenterY + halfRootIndex;
+				renderCellPixel(
+					frameState->framePixels,
+					frameState->framePixelResolution,
+					cellPixelX,
+					cellPixelY,
+					frameColorRed,
+					frameColorGreen,
+					frameColorBlue
+				);
+				cellPixelX = 
+					cellPixelCenterX - halfRootIndex;
+				cellPixelY =
+					cellPixelCenterY - halfRootIndex + sideIndex + 1;
+				renderCellPixel(
+					frameState->framePixels,
+					frameState->framePixelResolution,
+					cellPixelX,
+					cellPixelY,
+					frameColorRed,
+					frameColorGreen,
+					frameColorBlue
+				);
+			}
+		}
+	}
+  ///
   encodeRgb8bitPngPixels(
 		frameState->frameEncoding, 
 		frameState->framePixels
@@ -123,8 +269,9 @@ int main(int argc, char** argv) {
   char* framesDirectoryPath = argv[2];
   char* animationName = argv[3];
   uint16_t framePixelResolution = atoi(argv[4]);
-  int32_t frameCount = atoi(argv[5]);
-  int32_t frameIndex = atoi(argv[6]);
+  double fieldOfViewAngle = atof(argv[5]);
+  int32_t frameCount = atoi(argv[6]);
+  int32_t frameIndex = atoi(argv[7]);
   size_t framesDirectoryPathSize =
 		strlen(framesDirectoryPath) + 1;
 	size_t animationNameSize =
@@ -170,6 +317,7 @@ int main(int argc, char** argv) {
 		frameState->framePixels
 	);
   frameState->framePixelResolution = framePixelResolution;
+  frameState->fieldOfViewAngle = fieldOfViewAngle;
   frameState->frameIndex = frameIndex;
   JSRuntime* jsRuntime = JS_NewRuntime();
 	JSContext* jsContext = JS_NewContext(jsRuntime);
