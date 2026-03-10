@@ -3,9 +3,16 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include "./shared/PngEncoding.h"
+#include "./shared/PngPixels.h"
 
 typedef struct {
+  char* framesDirectoryPath;
+	char* animationName;
+  Rgb8bitPngPixels* framePixels;
+	uint8_t* frameEncoding;
 	uint16_t framePixelResolution;
+  uint16_t frameIndex;
 } FrameState;
 
 static void freeBufferData(
@@ -38,7 +45,51 @@ JSValue js_renderFrameCells(
 	JSValueConst* argv
 ) {
 	FrameState* frameState = JS_GetContextOpaque(jsContext);
-  printf("%d\n", frameState->framePixelResolution);
+  Rgb8bitPixelChannels* currentPixelChannels;
+	for (
+		U16 pixelColumnIndex = 0;
+		pixelColumnIndex < frameState->framePixelResolution;
+		pixelColumnIndex++
+	) {
+		for (
+			U16 pixelRowIndex = 0;
+			pixelRowIndex < frameState->framePixelResolution;
+			pixelRowIndex++
+		) {
+			currentPixelChannels = 
+				atPixelsDataPixelChannels(
+					frameState->framePixels,
+					pixelColumnIndex,
+					pixelRowIndex
+				);
+			currentPixelChannels->red = 255;
+			currentPixelChannels->green = 0;
+			currentPixelChannels->blue = 0;
+		}
+	}
+  encodeRgb8bitPngPixels(
+		frameState->frameEncoding, 
+		frameState->framePixels
+	);
+  char frameFilePath[200];
+	snprintf(
+		frameFilePath,
+		sizeof(frameFilePath),
+		"%s%s_%d.png",
+		frameState->framesDirectoryPath,
+		frameState->animationName,
+		frameState->frameIndex
+	);
+	FILE* frameFile =
+		fopen(frameFilePath, "wb");
+	fwrite(
+		frameState->frameEncoding,
+		1,
+		getRgb8bitPngEncodingSize(frameState->frameEncoding),
+		frameFile
+	);
+	fclose(frameFile);
+	return JS_UNDEFINED;
 }
 
 static const JSCFunctionListEntry jsHostFunctions[] = {
@@ -69,15 +120,57 @@ void setupAndLoadEntryScript(
 
 int main(int argc, char** argv) {
   char* scriptPath = argv[1];
-  uint16_t framePixelResolution = atoi(argv[2]);
-  int32_t frameCount = atoi(argv[3]);
-  int32_t frameIndex = atoi(argv[4]);
+  char* framesDirectoryPath = argv[2];
+  char* animationName = argv[3];
+  uint16_t framePixelResolution = atoi(argv[4]);
+  int32_t frameCount = atoi(argv[5]);
+  int32_t frameIndex = atoi(argv[6]);
+  size_t framesDirectoryPathSize =
+		strlen(framesDirectoryPath) + 1;
+	size_t animationNameSize =
+			strlen(animationName) + 1;
+  size_t framePixelsSize =
+		sizeofRgb8bitPngPixels(
+			framePixelResolution,
+			framePixelResolution
+		);
+	size_t maxFrameEncodingSize =
+		maxsizeofRgb8bitPngEncoding(
+			framePixelResolution,
+			framePixelResolution
+		);
   uint8_t* memoryBlock = 
-		(uint8_t*)malloc(sizeof(FrameState));
+		(uint8_t*)malloc(sizeof(FrameState) + framesDirectoryPathSize + animationNameSize + framePixelsSize + maxFrameEncodingSize);
 	uint8_t* memoryCursor = memoryBlock;
 	FrameState* frameState =
 		(FrameState*)memoryBlock;
+  memoryCursor += sizeof(FrameState);
+  frameState->framesDirectoryPath = (char*)memoryCursor;
+	strcpy(
+		frameState->framesDirectoryPath,
+		framesDirectoryPath
+	);
+	memoryCursor += framesDirectoryPathSize;
+  frameState->animationName = (char*)memoryCursor;
+	strcpy(
+		frameState->animationName,
+		animationName
+	);
+	memoryCursor += animationNameSize;
+  frameState->framePixels = (Rgb8bitPngPixels*)memoryCursor;
+	initRgb8bitPngPixels(
+		frameState->framePixels,
+		framePixelResolution,
+		framePixelResolution
+	);
+	memoryCursor += framePixelsSize;
+	frameState->frameEncoding = (uint8_t*)memoryCursor;
+	initRgb8bitPngEncoding(
+		frameState->frameEncoding,
+		frameState->framePixels
+	);
   frameState->framePixelResolution = framePixelResolution;
+  frameState->frameIndex = frameIndex;
   JSRuntime* jsRuntime = JS_NewRuntime();
 	JSContext* jsContext = JS_NewContext(jsRuntime);
   JSValue globalJs = JS_GetGlobalObject(jsContext);
