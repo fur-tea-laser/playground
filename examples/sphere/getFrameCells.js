@@ -2,7 +2,7 @@
 function getFrameCells(frameCount, frameIndex) {
   console.log(frameCount)
   console.log(frameIndex)
-  const azimuthResolution = 7
+  const azimuthResolution = 9
   const polarResolution = 128
   const cellCount = azimuthResolution * polarResolution
   const cellBuffer = Host.getFrameCellBuffer(cellCount)
