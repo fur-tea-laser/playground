@@ -1,8 +1,10 @@
+import { toUnicode } from "node:punycode";
+import { todo } from "node:test";
 
 await renderAnimation({
   processCount: 6,
   scriptPath: Deno.args[0],
-  framesDirectoryPath: Deno.args[1],
+  outputDirectoryPath: Deno.args[1],
   animationName: Deno.args[2],
   framePixelResolution: parseInt(Deno.args[3]),
   fieldOfViewAngle: parseFloat(Deno.args[4]),
@@ -11,7 +13,7 @@ await renderAnimation({
 
 interface RenderAnimationApi {
   scriptPath: string
-  framesDirectoryPath: string
+  outputDirectoryPath: string
   animationName: string 
   framePixelResolution: number
   frameCount: number
@@ -20,14 +22,15 @@ interface RenderAnimationApi {
 }
 
 async function renderAnimation({
+  outputDirectoryPath,
   processCount,
   frameCount,
   scriptPath,
-  framesDirectoryPath,
   animationName,
   framePixelResolution,
   fieldOfViewAngle
 }: RenderAnimationApi) {
+  const framesDirectoryPath = `${outputDirectoryPath}frames/`
   const frameIndexQueue = 
     new Array(frameCount)
       .fill(undefined)
@@ -46,6 +49,11 @@ async function renderAnimation({
       frameIndex: frameIndexQueue.shift()!,
     }))
   )
+  await encodeAnimation({
+    outputDirectoryPath,
+    framesDirectoryPath,
+    animationName
+  })
 }
 
 interface RenderFrameApi {
@@ -81,6 +89,7 @@ async function renderFrame({
       `${frameIndex}`
       ],
   });
+  console.log(`rendering frame: ${frameIndex}/${frameCount}`)
   await renderFrameCommand.output();
   const maybeNextFrameIndex = frameIndexQueue.shift()
   if (maybeNextFrameIndex !== undefined) {
@@ -95,4 +104,27 @@ async function renderFrame({
       frameIndex: maybeNextFrameIndex
     })
   }
+}
+
+interface EncodeAnimationApi {
+  outputDirectoryPath: string
+  framesDirectoryPath: string
+  animationName: string
+}
+
+async function encodeAnimation({
+  outputDirectoryPath,
+  framesDirectoryPath,
+  animationName
+}: EncodeAnimationApi) {
+  const encodeAnimationCommand = new Deno.Command(
+    "./binaries/encodeAnimation", {
+    args: [
+      outputDirectoryPath,
+      framesDirectoryPath,
+      animationName
+    ]
+  });
+console.log("encoding animation")
+await encodeAnimationCommand.output();
 }

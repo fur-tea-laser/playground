@@ -1,3 +1,3 @@
 #! /bin/sh
 
-deno run --allow-run ./programs/renderAnimation_3d.ts "/home/coder/project/examples/sphere/getFrameCells.js" "/home/coder/project/examples/sphere/frames/" "sphere" 4096 1.047 128
+deno run --allow-run ./programs/renderAnimation_3d.ts "/home/coder/project/examples/sphere/getFrameCells.js" "/home/coder/project/examples/sphere/output/" "sphere" 4096 1.047 128
