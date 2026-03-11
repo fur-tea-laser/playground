@@ -1,8 +1,6 @@
-import { toUnicode } from "node:punycode";
-import { todo } from "node:test";
 
 await renderAnimation({
-  processCount: 6,
+  processCount: 8,
   scriptPath: Deno.args[0],
   outputDirectoryPath: Deno.args[1],
   animationName: Deno.args[2],
@@ -87,7 +85,7 @@ async function renderFrame({
       `${fieldOfViewAngle}`,
       `${frameCount}`,
       `${frameIndex}`
-      ],
+    ],
   });
   console.log(`rendering frame: ${frameIndex}/${frameCount}`)
   await renderFrameCommand.output();

@@ -1,7 +1,6 @@
 
 function getFrameCells(frameCount, frameIndex) {
-  console.log(frameCount)
-  console.log(frameIndex)
+  const frameStamp = frameIndex / frameCount
   const azimuthResolution = 9
   const polarResolution = 128
   const cellCount = azimuthResolution * polarResolution
@@ -9,18 +8,23 @@ function getFrameCells(frameCount, frameIndex) {
   const cellView = new DataView(cellBuffer)
   const azimuthAngleStep = Math.PI / (azimuthResolution - 1)
   const polarAngleStep = 2 * Math.PI / polarResolution
+  const rotationAngle = 2 * Math.PI * frameStamp
   let azimuthAngle, polarAngle
+  let baseX, baseY, baseZ
   let cellIndex = 0
   for (let i = 0; i < azimuthResolution; i++) {
     azimuthAngle = i * azimuthAngleStep
     for (let j = 0; j < polarResolution; j++) {
       polarAngle = j * polarAngleStep
+      baseX = Math.sin(azimuthAngle) * Math.cos(polarAngle)
+      baseY = Math.cos(azimuthAngle)
+      baseZ = Math.sin(azimuthAngle) * Math.sin(polarAngle)
       setFrameCell(
         cellView,
         cellIndex,
         Math.sin(azimuthAngle) * Math.cos(polarAngle),        
-        Math.cos(azimuthAngle),
-        Math.sin(azimuthAngle) * Math.sin(polarAngle) - 5,
+        baseY * Math.cos(rotationAngle) - baseZ * Math.sin(rotationAngle),
+        baseY * Math.sin(rotationAngle) + baseZ * Math.cos(rotationAngle) - 5,
         0.01,
         255,
         255,

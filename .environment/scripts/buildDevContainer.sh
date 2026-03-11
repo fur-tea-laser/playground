@@ -1,3 +1,3 @@
 #/bin/sh
 
-docker build -t website-dev-container -f ./.environment/Dockerfile .
+docker build -t playground-dev-container -f ./.environment/Dockerfile .
