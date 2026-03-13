@@ -1,4 +1,4 @@
-import { phasedSpacer, spacer } from "./library/spacer/index.js"
+import { spacer } from "../library/spacer/index.js"
 
 function getFrameCells(frameCount, frameIndex) {
   const frameStamp = frameIndex / frameCount

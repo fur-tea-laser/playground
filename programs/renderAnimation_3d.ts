@@ -29,7 +29,10 @@ async function renderAnimation({
   fieldOfViewAngle
 }: RenderAnimationApi) {
   const framesDirectoryPath = `${outputDirectoryPath}frames/`
-  await Deno.remove(outputDirectoryPath, { recursive: true });
+  try {
+    await Deno.remove(outputDirectoryPath, { recursive: true });
+  }
+  catch {}
   await Deno.mkdir(framesDirectoryPath, { recursive: true });
   const frameIndexQueue = 
     new Array(frameCount)
