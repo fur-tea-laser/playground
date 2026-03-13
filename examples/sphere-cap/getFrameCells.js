@@ -1,36 +1,41 @@
+import { spacer, spacerSymmetricSlotWeights } from "../library/spacer/index.js"
 
 function getFrameCells(frameCount, frameIndex) {
   const frameStamp = frameIndex / frameCount
   const azimuthResolution = 8
   const polarResolution = 512
-  const capResolution = 8
-  const cellCount = azimuthResolution * polarResolution * capResolution
+  const capSpacerBase = spacer([13, [11,0],[7,0]])
+  const capSpacerBaseWeights = spacerSymmetricSlotWeights(capSpacerBase)
+  const capSpacer = symmetricalSpacer(spacer([13, [11,0],[7,0],[3,2]]))
+  const cellCount = azimuthResolution * polarResolution * capSpacer[0] * 2
   const cellBuffer = Host.getFrameCellBuffer(cellCount)
   const cellView = new DataView(cellBuffer)
   let cellIndex = 0
-  const azimuthAngleStep = Math.PI / 12 / (azimuthResolution - 1)
+  let azimuthAngleStep
   const polarAngleStep = 2 * Math.PI / polarResolution
-  const capAngleStep = 2 * Math.PI / capResolution
+  const capAngleStep = 2 * Math.PI / capSpacer[0]
   const originZ = -5
   let originX, originY
   let baseX, baseY, baseZ
   let orientX, orientY, orientZ
   let rotateX, rotateY, rotateZ
   let uX, uY
-  const rotationAngle = Math.PI / 4
+  const rotationAngle = Math.PI / 3
   const c = Math.cos(rotationAngle)
   const s = Math.sin(rotationAngle)
   const t = 1 - Math.cos(rotationAngle)
-  for (let k=0; k<capResolution; k++) {
-    const originAngle = k * capAngleStep
+  for (const capIndex of capSpacer[1]) {
+    const originAngle = capIndex * capAngleStep
+    azimuthAngleStep = Math.PI / capSpacer[0] / 2  / (azimuthResolution - 1)
     originX = 0.0 * Math.cos(originAngle - Math.PI / 2)
     originY = 0.0 * Math.sin(originAngle - Math.PI / 2)
     uX = Math.cos(originAngle)
     uY = Math.sin(originAngle)
     for (let i=0; i<azimuthResolution; i++) {
-      const azimuthAngle =  Math.PI - i * azimuthAngleStep 
+      let azimuthAngle =  Math.PI - i * azimuthAngleStep 
       for (let j=0; j<polarResolution; j++) {
         const polarAngle = j * polarAngleStep
+        azimuthAngle = Math.PI / 2 / capSpacer[0] / 2 * Math.sin(capSpacerBaseWeights[capIndex] * capSpacerBaseWeights[capIndex] * polarAngle + 3 * frameStamp) + azimuthAngle
         baseX = 1 * Math.sin(azimuthAngle) * Math.cos(polarAngle)
         baseY = 1 * Math.cos(azimuthAngle)
         baseZ = 1 * Math.sin(azimuthAngle) * Math.sin(polarAngle)
@@ -46,7 +51,19 @@ function getFrameCells(frameCount, frameIndex) {
           rotateX + originX,
           rotateY + originY,
           rotateZ + originZ,
-          0.005,
+          0.004,
+          255,
+          255,
+          255
+        )
+        cellIndex += 1
+        setFrameCell(
+          cellView,
+          cellIndex,
+          -rotateX - originX,
+          rotateY + originY,
+          rotateZ + originZ,
+          0.004,
           255,
           255,
           255
@@ -57,6 +74,8 @@ function getFrameCells(frameCount, frameIndex) {
   }
   Host.renderFrameCells(cellBuffer)
 }
+
+globalThis.getFrameCells = getFrameCells
 
 function setFrameCell(cellView, cellIndex, centerX, centerY, centerZ, halfRoot, cellRed, cellGreen, cellBlue) {
   const cellByteOffset = 35 * cellIndex;
@@ -69,4 +88,13 @@ function setFrameCell(cellView, cellIndex, centerX, centerY, centerZ, halfRoot, 
   cellView.setUint8(cellByteOffset + 34, cellBlue);
 }
 
-globalThis.getFrameCells = getFrameCells
+function symmetricalSpacer(someSpacer) {
+  const nextSpacerPoints = new Set(someSpacer[1])
+  for (const someSpacerPoint of someSpacer[1]) {
+    const mirrorPoint = (someSpacer[0] - someSpacerPoint) % someSpacer[0]
+    if (!nextSpacerPoints.has(mirrorPoint)) {
+      nextSpacerPoints.add(mirrorPoint)
+    }
+  }
+  return [someSpacer[0], Array.from(nextSpacerPoints).sort()]
+}
