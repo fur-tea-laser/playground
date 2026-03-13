@@ -3,52 +3,56 @@ function getFrameCells(frameCount, frameIndex) {
   const frameStamp = frameIndex / frameCount
   const azimuthResolution = 8
   const polarResolution = 512
-  const cellCount = azimuthResolution * polarResolution
+  const capResolution = 8
+  const cellCount = azimuthResolution * polarResolution * capResolution
   const cellBuffer = Host.getFrameCellBuffer(cellCount)
   const cellView = new DataView(cellBuffer)
   let cellIndex = 0
-  const azimuthAngleStep = Math.PI / 8 / (azimuthResolution - 1)
+  const azimuthAngleStep = Math.PI / 12 / (azimuthResolution - 1)
   const polarAngleStep = 2 * Math.PI / polarResolution
+  const capAngleStep = 2 * Math.PI / capResolution
   const originZ = -5
   let originX, originY
   let baseX, baseY, baseZ
   let orientX, orientY, orientZ
   let rotateX, rotateY, rotateZ
   let uX, uY
-  const rotationAngle = Math.PI / 2
+  const rotationAngle = Math.PI / 4
   const c = Math.cos(rotationAngle)
   const s = Math.sin(rotationAngle)
   const t = 1 - Math.cos(rotationAngle)
-  const originAngle = 0
-  originX = 0.0 * Math.cos(originAngle - Math.PI / 2)
-  originY = 0.0 * Math.sin(originAngle - Math.PI / 2)
-  uX = Math.cos(originAngle)
-  uY = Math.sin(originAngle)
-  for (let i=0; i<azimuthResolution; i++) {
-    const azimuthAngle =  Math.PI - i * azimuthAngleStep 
-    for (let j=0; j<polarResolution; j++) {
-      const polarAngle = j * polarAngleStep
-      baseX = 1 * Math.sin(azimuthAngle) * Math.cos(polarAngle)
-      baseY = 1 * Math.cos(azimuthAngle)
-      baseZ = 1 * Math.sin(azimuthAngle) * Math.sin(polarAngle)
-      orientX = baseX * Math.cos(originAngle) - baseY * Math.sin(originAngle)
-      orientY = baseX * Math.sin(originAngle) + baseY * Math.cos(originAngle)
-      orientZ = baseZ
-      rotateX = orientX * (c + uX * uX * t) + orientY * (uX * uY * t) + orientZ * (uY * s)
-      rotateY = orientX * (uX * uY * t) + orientY * (c + uY * uY * t) - orientZ * (uX * s)
-      rotateZ = -orientX * (uY * s) + orientY * (uX * s) + orientZ * (c)
-      setFrameCell(
-        cellView,
-        cellIndex,
-        rotateX + originX,
-        rotateY + originY,
-        rotateZ + originZ,
-        0.01,
-        255,
-        255,
-        255
-      )
-      cellIndex += 1
+  for (let k=0; k<capResolution; k++) {
+    const originAngle = k * capAngleStep
+    originX = 0.0 * Math.cos(originAngle - Math.PI / 2)
+    originY = 0.0 * Math.sin(originAngle - Math.PI / 2)
+    uX = Math.cos(originAngle)
+    uY = Math.sin(originAngle)
+    for (let i=0; i<azimuthResolution; i++) {
+      const azimuthAngle =  Math.PI - i * azimuthAngleStep 
+      for (let j=0; j<polarResolution; j++) {
+        const polarAngle = j * polarAngleStep
+        baseX = 1 * Math.sin(azimuthAngle) * Math.cos(polarAngle)
+        baseY = 1 * Math.cos(azimuthAngle)
+        baseZ = 1 * Math.sin(azimuthAngle) * Math.sin(polarAngle)
+        orientX = baseX * Math.cos(originAngle) - baseY * Math.sin(originAngle)
+        orientY = baseX * Math.sin(originAngle) + baseY * Math.cos(originAngle)
+        orientZ = baseZ
+        rotateX = orientX * (c + uX * uX * t) + orientY * (uX * uY * t) + orientZ * (uY * s)
+        rotateY = orientX * (uX * uY * t) + orientY * (c + uY * uY * t) - orientZ * (uX * s)
+        rotateZ = -orientX * (uY * s) + orientY * (uX * s) + orientZ * (c)
+        setFrameCell(
+          cellView,
+          cellIndex,
+          rotateX + originX,
+          rotateY + originY,
+          rotateZ + originZ,
+          0.005,
+          255,
+          255,
+          255
+        )
+        cellIndex += 1
+      }
     }
   }
   Host.renderFrameCells(cellBuffer)
