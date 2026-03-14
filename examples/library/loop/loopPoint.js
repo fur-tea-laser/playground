@@ -1,4 +1,4 @@
-import { ANGLE_LOOKUP_INDEX_SCALAR, COS_LOOKUP_TABLE, SIN_LOOKUP_TABLE, } from "./constants";
+import { ANGLE_LOOKUP_INDEX_SCALAR, COS_LOOKUP_TABLE, SIN_LOOKUP_TABLE, } from "./constants.js";
 /**
  * great for rendering geometry and synthesizing waves
  */
