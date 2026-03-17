@@ -6,15 +6,16 @@ function getFrameCells(frameCount, frameIndex) {
   const orientation_aa = mapSpacer(spacer([frameCount,[5,0]]),frameIndex)
   const orientation_bb = mapSpacer(spacer([frameCount,[7,0]]),frameIndex)
   const orientation_cc = mapSpacer(spacer([frameCount,[11,0]]),frameIndex)
+  const orientation_dd = mapSpacer(spacer([frameCount,[13,0]]),frameIndex)
   const orientation_ee = mapSpacer(spacer([frameCount,[17,0]]),frameIndex)
   const orientation_ff = mapSpacer(spacer([frameCount,[19,0]]),frameIndex)
   const orientation_gg = mapSpacer(spacer([frameCount,[29,0]]),frameIndex)
   const orientation_hh = mapSpacer(spacer([frameCount,[31,0]]),frameIndex)
-  const ringSpacer = spacer([31,[29,orientation_gg],[19,orientation_ff],[11,orientation_cc],[7,orientation_bb],[5,orientation_aa]])
+  const ringSpacer = spacer([31,[30,0],[29,orientation_gg],[19,orientation_ff],[18,0],[17,orientation_ee],[13,orientation_dd],[12,0],[11,orientation_cc],[7,orientation_bb],[6,0],[5,orientation_aa]])
   const ringRadiusWeights = spacerSymmetricSlotWeights(spacer([31,[29,orientation_gg],[19,orientation_ff]]))
   const orbRadiusWeights = spacerSymmetricSlotWeights(spacer([31,[29,orientation_gg],[19,orientation_ff],[17,orientation_ee]]))
   const orbShapeWeights = spacerSymmetricSlotWeights(spacer([31,[30,0],[29,orientation_gg],[19,orientation_ff],[18,0],[17,orientation_ee]]))
-  const azimuthOrientationWeights = spacerSymmetricSlotWeights(spacer([31,[29,orientation_gg],[19,orientation_ff],[11,orientation_cc],[7,orientation_bb],[5,orientation_aa]]))
+  const azimuthOrientationWeights = spacerSymmetricSlotWeights(ringSpacer)
   const azimuthResolution = 31
   const azimuthDensity = 5
   const polarResolution = 1024
@@ -34,7 +35,7 @@ function getFrameCells(frameCount, frameIndex) {
     const ringRadiusScalar = ringRadiusWeights[ringIndex]/ringRadiusWeights[0]
     const orbRadiusScalar = orbRadiusWeights[ringIndex]/orbRadiusWeights[0]
     const orbShapeScalar = orbShapeWeights[ringIndex]/orbShapeWeights[0]
-    const azimuthSpacer = phasedSpacer(spacer([31,[29,orientation_gg],[19,orientation_ff],[11,orientation_cc],[7,orientation_bb],[5,azimuthOrientationWeights[ringIndex]-1]]),orientation_hh)
+    const azimuthSpacer = phasedSpacer(spacer([31,[30,0],[29,orientation_gg],[19,orientation_ff],[18,0],[17,orientation_ee],[13,orientation_dd],[12,0],[11,orientation_cc],[7,orientation_bb],[6,0],[5,azimuthOrientationWeights[ringIndex]-1]]),orientation_hh)
     const originAngle = ringIndex * ringAngleStep
     const originX = 1 * ringRadiusScalar * Math.cos(originAngle-Math.PI/2)
     const originY = 1 * ringRadiusScalar * Math.sin(originAngle-Math.PI/2)
@@ -45,10 +46,11 @@ function getFrameCells(frameCount, frameIndex) {
     const s = Math.sin(rotationAngle)
     const t = 1 - Math.cos(rotationAngle)
     for (const azimuthIndex of azimuthSpacer[1]) {
+      if (azimuthIndex === 30) { continue }
       azimuthAngleBase = azimuthIndex * azimuthAngleStep
       for (let polarIndex=0; polarIndex<polarResolution; polarIndex++) {
         polarAngle = polarIndex * polarAngleStep
-        azimuthAngle = azimuthAngleBase + azimuthAngleStep / 2  * Math.sin(220 * polarAngle + 2 * Math.PI * frameStamp)
+        azimuthAngle = azimuthAngleBase + (azimuthAngleStep / 2 + azimuthAngleStep / 2.5 * (1-orbRadiusScalar) * Math.sin(polarAngle + Math.PI))  * Math.sin(220 * polarAngle + 2 * Math.PI * frameStamp)
         // azimuthAngle = azimuthAngleBase + orbRadiusWeights[ringIndex] * azimuthAngleStep * Math.sin((azimuthIndex + 1) * orbShapeWeights[ringIndex] * polarAngle + 2 * Math.PI * frameStamp)
         const subOrientationAngle = (originAngle+2*Math.PI*frameStamp)%(2*Math.PI)
         const azimuthPoint = loopPoint([[0.25+orbShapeScalar*0.5,0.5,subOrientationAngle,Math.PI/2,0]], (azimuthAngle+Math.PI/2)%(2*Math.PI))
@@ -72,7 +74,7 @@ function getFrameCells(frameCount, frameIndex) {
           rotateX + originX,
           rotateY + originY,
           rotateZ + originZ,
-          0.003,
+          0.005,
           255,
           255,
           255
@@ -84,7 +86,7 @@ function getFrameCells(frameCount, frameIndex) {
           -rotateX - originX,
           rotateY + originY,
           rotateZ + originZ,
-          0.003,
+          0.005,
           255,
           255,
           255
