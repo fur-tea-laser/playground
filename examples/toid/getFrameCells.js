@@ -14,10 +14,12 @@ function getFrameCells(frameCount, frameIndex) {
   const orientation_ff = mapSpacer(spacer([frameCount,[19,0]]),frameIndex)
   const orientation_gg = mapSpacer(spacer([frameCount,[12,0]],frameIndex))
   const orientation_hh = mapSpacer(spacer([frameCount,[18,0]],frameIndex))
+  const orientation_ii = mapSpacer(spacer([frameCount,[3,0]],frameIndex))
   const ringSpacer = spacer([23,[19,orientation_ff],[17,orientation_ee],[13,orientation_dd],[11,orientation_cc],[7,orientation_bb],[5,orientation_aa]])
+  const innerSpacer = spacer([23,[19,orientation_ff],[17,orientation_ee],[13,orientation_dd],[11,orientation_cc],[7,orientation_bb],[5,orientation_aa],[3,orientation_ii]])
   const ringWeights_aa = spacerSymmetricSlotWeights(spacer([23,[19,orientation_ff],[17,orientation_ee],[13,orientation_dd],[12,orientation_gg]]))
   const ringWeights_bb = spacerSymmetricSlotWeights(spacer([23,[18,orientation_hh],[12,orientation_gg]]))
-  const cellCount = ringSpacer[0] * azimuthDensity * polarResolution * 2
+  const cellCount = ringSpacer[0] * azimuthDensity * polarResolution * 2 *2
   const cellBuffer = Host.getFrameCellBuffer(cellCount)
   const cellView = new DataView(cellBuffer)
   let cellIndex = 0
@@ -32,6 +34,7 @@ function getFrameCells(frameCount, frameIndex) {
   let uX, uY
   let rotateX, rotateY, rotateZ
   for (const ringIndex of ringSpacer[1]) {
+    if (ringIndex === 0) continue
     const ringScalar_aa = ringWeights_aa[ringIndex]/ringWeights_aa[0]
     const ringScalar_bb = ringWeights_bb[ringIndex]/ringWeights_bb[0]
     const originAngle = ringIndex * originAngleStep
@@ -78,7 +81,7 @@ function getFrameCells(frameCount, frameIndex) {
           rotateX + originX,
           rotateY + originY,
           rotateZ + originZ,
-          0.005,
+          0.0035,
           255,
           255,
           255
@@ -90,7 +93,76 @@ function getFrameCells(frameCount, frameIndex) {
           -rotateX - originX,
           rotateY + originY,
           rotateZ + originZ,
-          0.005,
+          0.0035,
+          255,
+          255,
+          255
+        )
+        cellIndex += 1
+      }
+    }
+  }
+  for (const ringIndex of innerSpacer[1]) {
+    if (ringIndex === 0) continue
+    const ringScalar_aa = ringWeights_aa[ringIndex]/ringWeights_aa[0]
+    const ringScalar_bb = ringWeights_bb[ringIndex]/ringWeights_bb[0]
+    const originAngle = ringIndex * originAngleStep
+    originX = (ringScalar_aa) * Math.cos(originAngle-Math.PI/2+Math.PI)
+    originY = (ringScalar_aa) * Math.sin(originAngle-Math.PI/2+Math.PI)
+    const rotationVectorAngle = ringIndex>0?originAngle+originAngleStep*Math.sin(2*Math.PI*frameStamp+2*Math.PI*ringScalar_aa):originAngle
+    uX = Math.cos(rotationVectorAngle)
+    uY = Math.sin(rotationVectorAngle)
+    const rotationAngle = ringWeights_aa[ringIndex]*2*Math.PI*frameStamp+originAngle+Math.PI*ringScalar_bb*Math.sin(2*Math.PI*frameStamp)
+    const c = Math.cos(rotationAngle)
+    const s = Math.sin(rotationAngle)
+    const t = 1 - Math.cos(rotationAngle)
+    const orientation_jj = mapSpacer(spacer([ringSpacer[0],[ringWeights_aa[ringIndex],0]]),ringIndex)
+    const orientation_kk = mapSpacer(spacer([ringSpacer[0],[3,0]]),ringIndex)
+    const azimuthSpacer = spacer([frameCount,[ringSpacer[0],ringIndex],[ringWeights_aa[ringIndex],orientation_jj],[3,orientation_kk]])
+    const azimuthWeights = spacerSymmetricSlotWeights(azimuthSpacer)
+    const phasedAzimuthSpacer = phasedSpacer(azimuthSpacer,frameIndex)
+    for (let __azimuthIndex=0; __azimuthIndex<phasedAzimuthSpacer[1].length; __azimuthIndex++) {
+      const azimuthWeight = azimuthWeights[azimuthSpacer[1][__azimuthIndex]]
+      const azimuthIndex = phasedAzimuthSpacer[1][__azimuthIndex];
+      azimuthAngleBase = azimuthIndex * azimuthAngleStep
+      for (let polarIndex=0; polarIndex<polarResolution; polarIndex++) {
+        polarAngle = polarIndex * polarAngleStep
+        azimuthAngle = azimuthAngleBase + azimuthWeight*Math.PI/64*Math.sin(220*polarAngle+2*Math.PI*frameStamp)
+        const subOrientationAngle = ringIndex>0?(originAngle+2*Math.PI*frameStamp)%(2*Math.PI):originAngle
+        const azimuthPoint = loopPoint([[0.875-0.5*ringScalar_aa,0.75-ringScalar_bb*0.5,subOrientationAngle,Math.PI/2,0]], (azimuthAngle+Math.PI/2)%(2*Math.PI))
+        const azimuthSine = loopSine(azimuthPoint)
+        const azimuthCosine = loopCosine(azimuthPoint)
+        const polarPoint = loopPoint([[0.875-0.5*ringScalar_aa,0.75-ringScalar_bb*0.5,subOrientationAngle,Math.PI/2,0]], (polarAngle+Math.PI/2)%(2*Math.PI))
+        const polarSine = loopSine(polarPoint)
+        const polarCosine = loopCosine(polarPoint)
+        baseX = (0.33 + 0.33*ringScalar_bb) * azimuthSine * polarCosine
+        baseY = (0.33 + 0.33*ringScalar_bb) * azimuthCosine
+        baseZ = (0.33 + 0.33*ringScalar_bb) * azimuthSine * polarSine
+        orientX = baseX * Math.cos(originAngle) - baseY * Math.sin(originAngle)
+        orientY = baseX * Math.sin(originAngle) + baseY * Math.cos(originAngle)
+        orientZ = baseZ
+        rotateX = orientX * (c + uX * uX * t) + orientY * (uX * uY * t) + orientZ * (uY * s)
+        rotateY = orientX * (uX * uY * t) + orientY * (c + uY * uY * t) - orientZ * (uX * s)
+        rotateZ = -orientX * (uY * s) + orientY * (uX * s) + orientZ * (c)
+        setFrameCell(
+          cellView,
+          cellIndex,
+          rotateX + originX,
+          rotateY + originY,
+          rotateZ + originZ,
+          0.0035,
+          255,
+          255,
+          255
+        )
+        cellIndex += 1
+        setFrameCell(
+          cellView,
+          cellIndex,
+          -rotateX - originX,
+          rotateY + originY,
+          rotateZ + originZ,
+          0.0035,
           255,
           255,
           255
