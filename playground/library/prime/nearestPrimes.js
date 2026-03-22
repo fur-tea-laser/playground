@@ -1,4 +1,4 @@
-import { prime, primeSequenceInclusive } from "./prime";
+import { prime, primeSequenceInclusive } from "./prime.js";
 /**
  * great for rounding some number to nearest prime
  *

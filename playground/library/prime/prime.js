@@ -1,4 +1,4 @@
-import { throwInvalidPathError } from "../utilities/throwInvalidPathError";
+import { throwInvalidPathError } from "../utilities/throwInvalidPathError.js";
 /**
  * use for getting prime by index
  *

@@ -27,7 +27,7 @@ static void freeBufferData(
 
 const size_t FRAME_CELL_SIZE = 35;
 
-static JSValue js_getFrameCellBuffer(
+static JSValue js_getCellBuffer(
 	JSContext* jsContext, 
 	JSValueConst this_val, 
 	int argc, 
@@ -70,36 +70,13 @@ void renderCellPixel(
 	}
 }
 
-JSValue js_renderFrameCells(
+JSValue js_stampCells(
 	JSContext* jsContext,
 	JSValueConst this_val,
 	int argc,
 	JSValueConst* argv
 ) {
 	FrameState* frameState = JS_GetContextOpaque(jsContext);
-  Rgb8bitPixelChannels* currentPixelChannels;
-	for (
-		U16 pixelColumnIndex = 0;
-		pixelColumnIndex < frameState->framePixelResolution;
-		pixelColumnIndex++
-	) {
-		for (
-			U16 pixelRowIndex = 0;
-			pixelRowIndex < frameState->framePixelResolution;
-			pixelRowIndex++
-		) {
-			currentPixelChannels = 
-				atPixelsDataPixelChannels(
-					frameState->framePixels,
-					pixelColumnIndex,
-					pixelRowIndex
-				);
-			currentPixelChannels->red = 0;
-			currentPixelChannels->green = 0;
-			currentPixelChannels->blue = 0;
-		}
-	}
-  // transform frame cells
   size_t bufferSize;
 	uint8_t* bufferData = JS_GetArrayBuffer(jsContext, &bufferSize, argv[0]);
 	size_t cellCount = bufferSize / FRAME_CELL_SIZE;
@@ -212,35 +189,12 @@ JSValue js_renderFrameCells(
 			}
 		}
 	}
-  ///
-  encodeRgb8bitPngPixels(
-		frameState->frameEncoding, 
-		frameState->framePixels
-	);
-  char frameFilePath[200];
-	snprintf(
-		frameFilePath,
-		sizeof(frameFilePath),
-		"%s%s_%d.png",
-		frameState->framesDirectoryPath,
-		frameState->animationName,
-		frameState->frameIndex
-	);
-	FILE* frameFile =
-		fopen(frameFilePath, "wb");
-	fwrite(
-		frameState->frameEncoding,
-		1,
-		getRgb8bitPngEncodingSize(frameState->frameEncoding),
-		frameFile
-	);
-	fclose(frameFile);
 	return JS_UNDEFINED;
 }
 
 static const JSCFunctionListEntry jsHostFunctions[] = {
-	JS_CFUNC_DEF("getFrameCellBuffer", 1, js_getFrameCellBuffer),
-	JS_CFUNC_DEF("renderFrameCells", 1, js_renderFrameCells)
+	JS_CFUNC_DEF("getCellBuffer", 1, js_getCellBuffer),
+	JS_CFUNC_DEF("stampCells", 1, js_stampCells)
 };
 
 void setupAndLoadEntryScript(
@@ -319,6 +273,28 @@ int main(int argc, char** argv) {
   frameState->framePixelResolution = framePixelResolution;
   frameState->fieldOfViewAngle = fieldOfViewAngle;
   frameState->frameIndex = frameIndex;
+	Rgb8bitPixelChannels* currentPixelChannels;
+	for (
+		U16 pixelColumnIndex = 0;
+		pixelColumnIndex < frameState->framePixelResolution;
+		pixelColumnIndex++
+	) {
+		for (
+			U16 pixelRowIndex = 0;
+			pixelRowIndex < frameState->framePixelResolution;
+			pixelRowIndex++
+		) {
+			currentPixelChannels = 
+				atPixelsDataPixelChannels(
+					frameState->framePixels,
+					pixelColumnIndex,
+					pixelRowIndex
+				);
+			currentPixelChannels->red = 0;
+			currentPixelChannels->green = 0;
+			currentPixelChannels->blue = 0;
+		}
+	}
   JSRuntime* jsRuntime = JS_NewRuntime();
 	JSContext* jsContext = JS_NewContext(jsRuntime);
   JSValue globalJs = JS_GetGlobalObject(jsContext);
@@ -338,6 +314,28 @@ int main(int argc, char** argv) {
 	if (JS_IsException(maybeRuntimeException)) {
 		js_std_dump_error(jsContext);
 	}
+	encodeRgb8bitPngPixels(
+		frameState->frameEncoding, 
+		frameState->framePixels
+	);
+  char frameFilePath[200];
+	snprintf(
+		frameFilePath,
+		sizeof(frameFilePath),
+		"%s%s_%d.png",
+		frameState->framesDirectoryPath,
+		frameState->animationName,
+		frameState->frameIndex
+	);
+	FILE* frameFile =
+		fopen(frameFilePath, "wb");
+	fwrite(
+		frameState->frameEncoding,
+		1,
+		getRgb8bitPngEncodingSize(frameState->frameEncoding),
+		frameFile
+	);
+	fclose(frameFile);
   JS_FreeValue(jsContext, maybeRuntimeException);
 	JS_FreeValue(jsContext, getFrameCellsArgs[1]);
 	JS_FreeValue(jsContext, getFrameCellsArgs[0]);

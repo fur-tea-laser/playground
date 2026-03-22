@@ -1,5 +1,5 @@
-import { primeSequenceInRange } from "./prime";
-import { primeContainerSequence } from "./primeContainer";
+import { primeSequenceInRange } from "./prime.js";
+import { primeContainerSequence } from "./primeContainer.js";
 /**
  * great for working with primes that share bounds and analyzing prime distribution
  *

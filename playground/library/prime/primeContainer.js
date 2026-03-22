@@ -1,5 +1,5 @@
-import { throwInvalidPathError } from "../utilities/throwInvalidPathError";
-import { isPrimeContainer } from "./primeChecks";
+import { throwInvalidPathError } from "../utilities/throwInvalidPathError.js";
+import { isPrimeContainer } from "./primeChecks.js";
 /**
  * great for organizing primes and who knows what else
  *
