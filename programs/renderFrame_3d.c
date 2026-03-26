@@ -25,7 +25,7 @@ static void freeBufferData(
 	free(bufferData);
 }
 
-const size_t FRAME_CELL_SIZE = 35;
+const size_t FRAME_CELL_SIZE = 51;
 
 static JSValue js_getCellBuffer(
 	JSContext* jsContext, 
@@ -81,35 +81,36 @@ JSValue js_stampCells(
 	uint8_t* bufferData = JS_GetArrayBuffer(jsContext, &bufferSize, argv[0]);
 	size_t cellCount = bufferSize / FRAME_CELL_SIZE;
 	uint32_t cellByteOffset;
-	double centerX, centerY, centerZ, halfRoot;
+	double centerX, centerY, centerZ, halfRoot, translateScalarX, translateScalarY;
 	uint8_t frameColorRed, frameColorGreen, frameColorBlue;
 	int cellPixelCenterX, cellPixelCenterY, cellPixelX, cellPixelY;
 	uint32_t cellPixelHalfRoot;
 	double cellScalar = frameState->framePixelResolution / 2;
-	double fieldOfViewScalar, scalarX, scalarY, scaledX, scaledY, scaledHalfRoot, clippingW;
+	double fieldOfViewScalar, invertedFieldOfViewScalar, scaledX, scaledY, scaledHalfRoot, clippingW;
 	for (size_t cellIndex = 0; cellIndex < cellCount; cellIndex++) {
 		cellByteOffset = FRAME_CELL_SIZE * cellIndex;
 		centerX = *(double*)(bufferData + cellByteOffset);
 		centerY = *(double*)(bufferData + cellByteOffset + 8);
 		centerZ = *(double*)(bufferData + cellByteOffset + 16);
 		halfRoot = *(double*)(bufferData + cellByteOffset + 24);
-		frameColorRed = *(uint8_t*)(bufferData + cellByteOffset + 32);
-		frameColorGreen = *(uint8_t*)(bufferData + cellByteOffset + 33);
-		frameColorBlue = *(uint8_t*)(bufferData + cellByteOffset + 34);
+		translateScalarX = *(double*)(bufferData + cellByteOffset + 32);
+		translateScalarY = *(double*)(bufferData + cellByteOffset + 40);
+		frameColorRed = *(uint8_t*)(bufferData + cellByteOffset + 48);
+		frameColorGreen = *(uint8_t*)(bufferData + cellByteOffset + 49);
+		frameColorBlue = *(uint8_t*)(bufferData + cellByteOffset + 50);
 		fieldOfViewScalar = tan(frameState->fieldOfViewAngle / 2);
-		scalarY = 1 / fieldOfViewScalar;
-		scalarX = 1 / fieldOfViewScalar;
-		scaledX = centerX * scalarX;
-		scaledY = centerY * scalarY;
-		scaledHalfRoot = halfRoot * scalarY;
+		invertedFieldOfViewScalar = 1 / fieldOfViewScalar;
+		scaledX = centerX * invertedFieldOfViewScalar;
+		scaledY = centerY * invertedFieldOfViewScalar;
+		scaledHalfRoot = halfRoot * invertedFieldOfViewScalar;
 		clippingW = -centerZ;
 		scaledX = scaledX / clippingW;
 		scaledY = scaledY / clippingW;
 		scaledHalfRoot = scaledHalfRoot / clippingW;
 		cellPixelCenterX =
-			(int)round(cellScalar * (scaledX + 1));
+			(int)round(cellScalar * (scaledX + 1) + cellScalar * translateScalarX);
 		cellPixelCenterY =
-			(int)round(cellScalar * (scaledY + 1));
+			(int)round(cellScalar * (scaledY + 1) + cellScalar * translateScalarY);
 		cellPixelHalfRoot =
 			(uint32_t)(cellScalar * scaledHalfRoot);
 		cellPixelX = cellPixelCenterX;
