@@ -5,64 +5,307 @@ function getFrameCells(frameCount, frameIndex) {
   const polarResolution_aa = 1028
   const polarResolution_bb = 1028
   const polarResolution_cc = 1028
-  const cellCount = 8*polarResolution_aa + 8*polarResolution_bb + 4*polarResolution_cc
+  const polarResolution_dd = 1028
+  const polarResolution_ee = 1028
+  const cellCount = 
+    8*polarResolution_aa + 
+    8*polarResolution_bb + 
+    4*polarResolution_cc + 
+    8*polarResolution_dd + 
+    polarResolution_ee
   const cellBuffer = Host.getCellBuffer(cellCount)
   const cellView = new DataView(cellBuffer)
   const cellIndex = { ref: 0 }
-  stamp_aa({
+  stampGroup({
     frameStamp,
     cellView,
     cellIndex,
     polarResolution: polarResolution_aa,
     originAngle: 0,
     originVector: [0,0,-5],
-    loopsoidRadius: 1,
+    loopsoidRadius: 0.75,
     azimuthAngleBase: Math.PI/4,
+    azimuthPhaseAngle: Math.PI/2,
     azimuthLoop: [[1,0,0,0,0]],
-    polarLoop: [[0.675,1,0,Math.PI/2*3,0]],
+    polarLoop: [[1,0,0,0,0]],
     rotationAngle: Math.PI/2,
     rotationVector: [Math.cos(0), Math.sin(0)],
-    frameCellSize: 0.0075,
-    translateVector: [-0.6,-0.4],
+    frameCellSize: 0.006,
+    translateVector: [-0.65,-0.65],
+    stampLayers: [
+      {
+        baseAzimuthAngleFrequency: 714,
+        baseAzimuthAngleAmplitude: Math.PI/2,
+        oscAzimuthAngleFrequency: 1022,
+        oscAzimuthAngleAmplitude: Math.PI,
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 714,
+        baseAzimuthAngleAmplitude: Math.PI/4,
+        oscAzimuthAngleFrequency: 1022,
+        oscAzimuthAngleAmplitude: Math.PI,
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 714,
+        baseAzimuthAngleAmplitude: Math.PI/8,
+        oscAzimuthAngleFrequency: 1022,
+        oscAzimuthAngleAmplitude: Math.PI,
+        ringColor: [0,0,0]
+      },
+      {
+        baseAzimuthAngleFrequency: 714,
+        baseAzimuthAngleAmplitude: Math.PI/16,
+        oscAzimuthAngleFrequency: 1022,
+        oscAzimuthAngleAmplitude: Math.PI,
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 714,
+        baseAzimuthAngleAmplitude: Math.PI/32,
+        oscAzimuthAngleFrequency: 1022,
+        oscAzimuthAngleAmplitude: Math.PI,
+        ringColor: [0,0,0]
+      },
+      {
+        baseAzimuthAngleFrequency: 714,
+        baseAzimuthAngleAmplitude: Math.PI/64,
+        oscAzimuthAngleFrequency: 1022,
+        oscAzimuthAngleAmplitude: Math.PI,
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 714,
+        baseAzimuthAngleAmplitude: Math.PI/128,
+        oscAzimuthAngleFrequency: 1022,
+        oscAzimuthAngleAmplitude: Math.PI,
+        ringColor: [0,0,0]
+      },
+      {
+        baseAzimuthAngleFrequency: 714,
+        baseAzimuthAngleAmplitude: Math.PI/256,
+        oscAzimuthAngleFrequency: 1022,
+        oscAzimuthAngleAmplitude: Math.PI,
+        ringColor: [255,255,255]
+      }
+    ]
   })
-  stamp_bb({
+  stampGroup({
     frameStamp,
     cellView,
     cellIndex,
     polarResolution: polarResolution_bb,
     originAngle: 0,
     originVector: [0,0,-5],
-    loopsoidRadius: 1,
+    loopsoidRadius: 0.75,
     azimuthAngleBase: Math.PI/4,
+    azimuthPhaseAngle: Math.PI/2,
     azimuthLoop: [[1,0,0,0,0]],
-    polarLoop: [[0.675,1,Math.PI/2*3,Math.PI,0]],
+    polarLoop: [[1,0,0,0,0]],
     rotationAngle: Math.PI/2,
     rotationVector: [Math.cos(0), Math.sin(0)],
-    frameCellSize: 0.0075,
-    translateVector: [0.5,0.625],
+    frameCellSize: 0.006,
+    translateVector: [0.65,-0.65],
+    stampLayers: [
+      {
+        baseAzimuthAngleFrequency: 1080,
+        baseAzimuthAngleAmplitude: Math.PI/2,
+        oscAzimuthAngleFrequency: 1024,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 1080,
+        baseAzimuthAngleAmplitude: Math.PI/4,
+        oscAzimuthAngleFrequency: 1024,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [0,0,0]
+      },
+      {
+        baseAzimuthAngleFrequency: 1080,
+        baseAzimuthAngleAmplitude: Math.PI/8,
+        oscAzimuthAngleFrequency: 1024,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 1080,
+        baseAzimuthAngleAmplitude: Math.PI/16,
+        oscAzimuthAngleFrequency: 1024,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [0,0,0]
+      },
+      {
+        baseAzimuthAngleFrequency: 1080,
+        baseAzimuthAngleAmplitude: Math.PI/32,
+        oscAzimuthAngleFrequency: 1024,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 1080,
+        baseAzimuthAngleAmplitude: Math.PI/64,
+        oscAzimuthAngleFrequency: 1024,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [0,0,0]
+      },
+      {
+        baseAzimuthAngleFrequency: 1080,
+        baseAzimuthAngleAmplitude: Math.PI/128,
+        oscAzimuthAngleFrequency: 1024,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [0,0,0]
+      },
+      {
+        baseAzimuthAngleFrequency: 1080,
+        baseAzimuthAngleAmplitude: Math.PI/256,
+        oscAzimuthAngleFrequency: 1024,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      }
+    ]
   })
-  stamp_cc({
+  stampGroup({
     frameStamp,
     cellView,
     cellIndex,
     polarResolution: polarResolution_cc,
     originAngle: 0,
     originVector: [0,0,-5],
-    loopsoidRadius: 1,
+    loopsoidRadius: 0.75,
     azimuthAngleBase: Math.PI/4,
+    azimuthPhaseAngle: Math.PI/2,
     azimuthLoop: [[1,0,0,0,0]],
-    polarLoop: [[0.625,1,0,Math.PI/2,0]],
+    polarLoop: [[1,0,0,0,0]],
     rotationAngle: Math.PI/2,
     rotationVector: [Math.cos(0), Math.sin(0)],
-    frameCellSize: 0.0075,
-    translateVector: [-0.05,0],
+    frameCellSize: 0.006,
+    translateVector: [0,-0.65],
+    stampLayers: [
+      {
+        baseAzimuthAngleFrequency: 1544,
+        baseAzimuthAngleAmplitude: Math.PI/2,
+        oscAzimuthAngleFrequency: 1540,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 1544,
+        baseAzimuthAngleAmplitude: Math.PI/4,
+        oscAzimuthAngleFrequency: 1540,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 1544,
+        baseAzimuthAngleAmplitude: Math.PI/8,
+        oscAzimuthAngleFrequency: 1540,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 1544,
+        baseAzimuthAngleAmplitude: Math.PI/16,
+        oscAzimuthAngleFrequency: 1540,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+    ]
+  })
+  stampGroup({
+    frameStamp,
+    cellView,
+    cellIndex,
+    polarResolution: polarResolution_dd,
+    originAngle: 0,
+    originVector: [0,0,-5],
+    loopsoidRadius: 0.75,
+    azimuthAngleBase: Math.PI/4,
+    azimuthPhaseAngle: Math.PI/2,
+    azimuthLoop: [[1,0,0,0,0]],
+    polarLoop: [[1,0,0,0,0]],
+    rotationAngle: Math.PI/2,
+    rotationVector: [Math.cos(0), Math.sin(0)],
+    frameCellSize: 0.006,
+    translateVector: [0.65,0],
+    stampLayers: [
+      {
+        baseAzimuthAngleFrequency: 2554,
+        baseAzimuthAngleAmplitude: Math.PI/32,
+        oscAzimuthAngleFrequency: 1042,
+        oscAzimuthAngleAmplitude: Math.PI/64,   
+        ringColor: [255,255,255]
+      },
+    ]
+  })
+  stampGroup({
+    frameStamp,
+    cellView,
+    cellIndex,
+    polarResolution: polarResolution_ee,
+    originAngle: 0,
+    originVector: [0,0,-5],
+    loopsoidRadius: 0.75,
+    azimuthAngleBase: Math.PI/4,
+    azimuthPhaseAngle: Math.PI/2,
+    azimuthLoop: [[1,0,0,0,0]],
+    polarLoop: [[1,0,0,Math.PI/2,0]],
+    rotationAngle: Math.PI/2,
+    rotationVector: [Math.cos(0), Math.sin(0)],
+    frameCellSize: 0.006,
+    translateVector: [0,0],
+    stampLayers: [
+      {
+        baseAzimuthAngleFrequency: 255,
+        baseAzimuthAngleAmplitude: Math.PI/5,
+        oscAzimuthAngleFrequency: 1029,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 255,
+        baseAzimuthAngleAmplitude: Math.PI/4,
+        oscAzimuthAngleFrequency: 1029,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 255,
+        baseAzimuthAngleAmplitude: Math.PI/3,
+        oscAzimuthAngleFrequency: 1029,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 255,
+        baseAzimuthAngleAmplitude: Math.PI/2,
+        oscAzimuthAngleFrequency: 1029,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 255,
+        baseAzimuthAngleAmplitude: Math.PI,
+        oscAzimuthAngleFrequency: 1029,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [255,255,255]
+      },
+      {
+        baseAzimuthAngleFrequency: 255,
+        baseAzimuthAngleAmplitude: Math.PI/10,
+        oscAzimuthAngleFrequency: 1029,
+        oscAzimuthAngleAmplitude: Math.PI,   
+        ringColor: [0,0,0]
+      },
+    ]
   })
   Host.stampCells(cellBuffer)
 }
 
 globalThis.getFrameCells = getFrameCells
 
-function stamp_aa({
+function stampGroup({
   frameStamp,
   cellView,
   cellIndex,
@@ -77,463 +320,33 @@ function stamp_aa({
   rotationVector,
   frameCellSize,
   translateVector,
+  azimuthPhaseAngle,
+  stampLayers
 }) {
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 714,
-    baseAzimuthAngleAmplitude: Math.PI/2,
-    oscAzimuthAngleFrequency: 1022,
-    oscAzimuthAngleAmplitude: Math.PI,
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 714,
-    baseAzimuthAngleAmplitude: Math.PI/4,
-    oscAzimuthAngleFrequency: 1022,
-    oscAzimuthAngleAmplitude: Math.PI,
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 714,
-    baseAzimuthAngleAmplitude: Math.PI/8,
-    oscAzimuthAngleFrequency: 1022,
-    oscAzimuthAngleAmplitude: Math.PI,
-    ringColor: [0,0,0]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 714,
-    baseAzimuthAngleAmplitude: Math.PI/16,
-    oscAzimuthAngleFrequency: 1022,
-    oscAzimuthAngleAmplitude: Math.PI,
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 714,
-    baseAzimuthAngleAmplitude: Math.PI/32,
-    oscAzimuthAngleFrequency: 1022,
-    oscAzimuthAngleAmplitude: Math.PI,
-    ringColor: [0,0,0]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 714,
-    baseAzimuthAngleAmplitude: Math.PI/64,
-    oscAzimuthAngleFrequency: 1022,
-    oscAzimuthAngleAmplitude: Math.PI,
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 714,
-    baseAzimuthAngleAmplitude: Math.PI/128,
-    oscAzimuthAngleFrequency: 1022,
-    oscAzimuthAngleAmplitude: Math.PI,
-    ringColor: [0,0,0]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 714,
-    baseAzimuthAngleAmplitude: Math.PI/256,
-    oscAzimuthAngleFrequency: 1022,
-    oscAzimuthAngleAmplitude: Math.PI,
-    ringColor: [255,255,255],
-  })
-}
-
-function stamp_bb({
-  frameStamp,
-  cellView,
-  cellIndex,
-  polarResolution,
-  originAngle,
-  originVector,
-  loopsoidRadius,
-  azimuthAngleBase,
-  azimuthLoop,
-  polarLoop,
-  rotationAngle,
-  rotationVector,
-  frameCellSize,
-  translateVector,
-}) {
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080,
-    baseAzimuthAngleAmplitude: Math.PI/2,
-    oscAzimuthAngleFrequency: 1024,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080,
-    baseAzimuthAngleAmplitude: Math.PI/4,
-    oscAzimuthAngleFrequency: 1024,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [0,0,0]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080,
-    baseAzimuthAngleAmplitude: Math.PI/8,
-    oscAzimuthAngleFrequency: 1024,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080,
-    baseAzimuthAngleAmplitude: Math.PI/16,
-    oscAzimuthAngleFrequency: 1024,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [0,0,0]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080,
-    baseAzimuthAngleAmplitude: Math.PI/32,
-    oscAzimuthAngleFrequency: 1024,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080,
-    baseAzimuthAngleAmplitude: Math.PI/64,
-    oscAzimuthAngleFrequency: 1024,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [0,0,0]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080,
-    baseAzimuthAngleAmplitude: Math.PI/128,
-    oscAzimuthAngleFrequency: 1024,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [0,0,0]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080,
-    baseAzimuthAngleAmplitude: Math.PI/256,
-    oscAzimuthAngleFrequency: 1024,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [255,255,255]
-  })
-}
-
-function stamp_cc({
-  frameStamp,
-  cellView,
-  cellIndex,
-  polarResolution,
-  originAngle,
-  originVector,
-  loopsoidRadius,
-  azimuthAngleBase,
-  azimuthLoop,
-  polarLoop,
-  rotationAngle,
-  rotationVector,
-  frameCellSize,
-  translateVector,
-}) {
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080+464,
-    baseAzimuthAngleAmplitude: Math.PI/2,
-    oscAzimuthAngleFrequency: 1024+258*2,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080+464,
-    baseAzimuthAngleAmplitude: Math.PI/4,
-    oscAzimuthAngleFrequency: 1024+258*2,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080+464,
-    baseAzimuthAngleAmplitude: Math.PI/8,
-    oscAzimuthAngleFrequency: 1024+258*2,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [255,255,255]
-  })
-  stampRing({
-    frameStamp,
-    cellView,
-    cellIndex,
-    polarResolution,
-    originAngle,
-    originVector,
-    loopsoidRadius,
-    azimuthAngleBase,
-    azimuthLoop,
-    polarLoop,
-    rotationAngle,
-    rotationVector,
-    frameCellSize,
-    translateVector,
-    baseAzimuthAngleFrequency: 1080+464,
-    baseAzimuthAngleAmplitude: Math.PI/16,
-    oscAzimuthAngleFrequency: 1024+258*2,
-    oscAzimuthAngleAmplitude: Math.PI,   
-    ringColor: [255,255,255]
-  })
+  for (const someLayer of stampLayers) {
+    stampRing({
+      frameStamp,
+      cellView,
+      cellIndex,
+      polarResolution,
+      originAngle,
+      originVector,
+      loopsoidRadius,
+      azimuthAngleBase,
+      azimuthLoop,
+      polarLoop,
+      rotationAngle,
+      rotationVector,
+      frameCellSize,
+      translateVector,
+      azimuthPhaseAngle,
+      baseAzimuthAngleFrequency: someLayer.baseAzimuthAngleFrequency,
+      baseAzimuthAngleAmplitude: someLayer.baseAzimuthAngleAmplitude,
+      oscAzimuthAngleFrequency: someLayer.oscAzimuthAngleFrequency,
+      oscAzimuthAngleAmplitude: someLayer.oscAzimuthAngleAmplitude,
+      ringColor: someLayer.ringColor
+    })
+  }
 }
 
 function stampRing({
@@ -556,7 +369,7 @@ function stampRing({
   oscAzimuthAngleAmplitude,
   oscAzimuthAngleFrequency,
   baseAzimuthAngleFrequency,
-  
+  azimuthPhaseAngle
 }) {
   loopsoidRing({
     frameStamp,
@@ -575,7 +388,7 @@ function stampRing({
     translateVector,
     ringColor,
     getAzimuthAngleOffset: (polarAngle, frameStamp) => 
-      (baseAzimuthAngleAmplitude + oscAzimuthAngleAmplitude * Math.sin(oscAzimuthAngleFrequency * polarAngle + Math.PI/2)) * Math.sin(baseAzimuthAngleFrequency * polarAngle + Math.PI/2)
+      (baseAzimuthAngleAmplitude + oscAzimuthAngleAmplitude * Math.sin(oscAzimuthAngleFrequency * polarAngle + azimuthPhaseAngle)) * Math.sin(baseAzimuthAngleFrequency * polarAngle + azimuthPhaseAngle)
   })
 }
 
