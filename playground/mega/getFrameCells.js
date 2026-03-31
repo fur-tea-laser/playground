@@ -18,8 +18,8 @@ function getFrameCells(frameCount, frameIndex) {
   const megaRotationAngle = Math.PI/2
   const megaRotationVector = [Math.cos(0), Math.sin(0)]
   const megaTranslateVector = [0,0]
-  const megaBaseAzimuthAngleFrequency = 513+2*171//1001
-  const oscAzimuthAngleFrequency = 3+2*263//769
+  const megaBaseAzimuthAngleFrequency = 29+2*173
+  const oscAzimuthAngleFrequency = 29+2*173
   const megaStampLayers = [
     {
       baseAzimuthAngleFrequency: megaBaseAzimuthAngleFrequency,
