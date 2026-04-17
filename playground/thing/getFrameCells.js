@@ -2,151 +2,74 @@ import { orientatedSpacer, setFrameCell, spacer, spacerSymmetricSlotWeights } fr
 
 function getFrameCells(frameCount, frameIndex) {
   const frameStamp = frameIndex / frameCount
-  const spacer_aa = spacer([2142,[2141,0],[1092,0]])
-  const weights_aa = fasterWeights(spacer([2142,[2141,0]]),spacer([2141,[1092,0]]))
-  const spacer_bb = spacer([2142,[2141,0],[1092,0],[5,0]])
-  const waveResolution_aa = spacer_aa[0]
-  const waveHorizStep_aa = 2/waveResolution_aa
-  const waveAngleStep_bb = 2*Math.PI/waveResolution_aa
-  const cellCount = 2*8*waveResolution_aa
+  const ringSpacer = spacer([60,[59,0],[43,0],[29,0],[19,0],[12,0]])
+  const flagSpacerResolution = 2142
+  const spacer_aa = spacer([flagSpacerResolution,[2141,0],[1092,0]])
+  const points_aa = new Set(spacer_aa[1])
+  const weights_aa = fasterWeights(spacer([flagSpacerResolution,[2141,0]]),spacer([2141,[1092,0]]))
+  const spacer_bb = spacer([flagSpacerResolution,[2141,0],[1092,0],[12,0]])
+  const cellCount = ringSpacer[1].length*8*flagSpacerResolution
   const cellBuffer = Host.getCellBuffer(cellCount)
   const cellView = new DataView(cellBuffer)
-  let cellIndex = 0
-  let originX = -1
-  let originY = 0
-  let originZ = -3
-  let pointStamp, pointWeight, pointWeightStamp
-  let radiusAngle, radiusX, radiusY
-  let radiusAngle_bb, radiusX_bb, radiusY_bb
-  let baseX, baseY, baseZ
-  let cellColor 
-  let cellSize = 0.01
-  for (const i of spacer_aa[1]) {
-    pointStamp = i/spacer_aa[0]
-    pointWeight = weights_aa[i]
-    pointWeightStamp = pointWeight/weights_aa[0]
-    radiusAngle = Math.PI*Math.sin((220+frameIndex)*waveAngleStep_bb*i)
-    radiusX = Math.cos(9*radiusAngle)
-    radiusY = Math.sin(220*radiusAngle)
-    baseX = waveHorizStep_aa*i+radiusX
-    baseY = radiusY
-    cellColor = i<spacer_bb[1][1] ? interpolateColor([0, 229, 255],[128, 242, 255],pointWeightStamp)
-              : i<spacer_bb[1][2] ? interpolateColor([105, 240, 174],[186, 248, 212],pointWeightStamp)
-              : i<spacer_bb[1][3] ? interpolateColor([255, 82, 82],[255, 179, 179],pointWeightStamp)
-              : i<spacer_bb[1][4] ? interpolateColor([255, 215, 64],[255, 229, 127],pointWeightStamp)
-              : interpolateColor([255, 64, 129],[255, 128, 171],pointWeightStamp)
-    setFrameCell(
-      cellView,
-      cellIndex,
-      baseX+originX,
-      baseY+originY,
-      originZ,
-      cellSize,
-      0,
-      0,
-      cellColor[0],
-      cellColor[1],
-      cellColor[2]
-    )
-    cellIndex += 1
-    setFrameCell(
-      cellView,
-      cellIndex,
-      -baseX-originX,
-      baseY+originY,
-      originZ,
-      cellSize,
-      0,
-      0,
-      cellColor[0],
-      cellColor[1],
-      cellColor[2]
-    )
-    cellIndex += 1
-    setFrameCell(
-      cellView,
-      cellIndex,
-      baseX+originX,
-      -baseY-originY,
-      originZ,
-      cellSize,
-      0,
-      0,
-      cellColor[0],
-      cellColor[1],
-      cellColor[2]
-    )
-    cellIndex += 1
-    setFrameCell(
-      cellView,
-      cellIndex,
-      -baseX-originX,
-      -baseY-originY,
-      originZ,
-      cellSize,
-      0,
-      0,
-      cellColor[0],
-      cellColor[1],
-      cellColor[2]
-    )
-    cellIndex += 1
-    setFrameCell(
-      cellView,
-      cellIndex,
-      baseY+originY,
-      baseX+originX,      
-      originZ,
-      cellSize,
-      0,
-      0,
-      cellColor[0],
-      cellColor[1],
-      cellColor[2]
-    )
-    cellIndex += 1
-    setFrameCell(
-      cellView,
-      cellIndex,
-      baseY+originY,
-      -baseX-originX,      
-      originZ,
-      cellSize,
-      0,
-      0,
-      cellColor[0],
-      cellColor[1],
-      cellColor[2]
-    )
-    cellIndex += 1
-    setFrameCell(
-      cellView,
-      cellIndex,
-      -baseY-originY,
-      baseX+originX,      
-      originZ,
-      cellSize,
-      0,
-      0,
-      cellColor[0],
-      cellColor[1],
-      cellColor[2]
-    )
-    cellIndex += 1
-    setFrameCell(
-      cellView,
-      cellIndex,
-      -baseY-originY,
-      -baseX-originX,      
-      originZ,
-      cellSize,
-      0,
-      0,
-      cellColor[0],
-      cellColor[1],
-      cellColor[2]
-    )
-    cellIndex += 1
+  const cellIndexRef = { value: 0 }
+  const ringAngleStep = 2*Math.PI/ringSpacer[0]
+  const ringRadius = 3
+  let ringAngle, ringX, ringY
+  let pointWeight, pointWeightStamp
+  const horizontalLength = 6
+  const halfHorizontal = horizontalLength/2
+  const radiusAngleStep = 2*Math.PI/flagSpacerResolution
+  const horizontalStep = horizontalLength/flagSpacerResolution
+  const cellSize = 0.01
+  const colors = [
+    [[125, 235, 255], [190, 245, 255]], 
+    [[226, 255, 92], [241, 255, 173]],
+    [[255, 133, 228], [255, 194, 242]]
+  ];
+  for (let i=0; i<flagSpacerResolution; i++) {
+    ringSpacer[1].forEach((someRingPoint, ringPointIndex) => {
+      ringAngle = ringAngleStep*someRingPoint-Math.PI/2
+      ringX = ringRadius*Math.cos(ringAngle)
+      ringY = ringRadius*Math.sin(ringAngle)
+      pointWeight = weights_aa[i]
+        pointWeightStamp = pointWeight/weights_aa[0]
+        const radiusLength_aa = 0.125*pointWeightStamp
+        setFlagCell({
+          cellView,
+          cellIndexRef,
+          radiusAngleStep,
+          horizontalStep,
+          spacerPoint: i,
+          radiusLength: radiusLength_aa,
+          radiusAngleFrequency: 220+314,
+          radiusXFrequency: 9,
+          radiusYFrequency: 220,
+          originX: ringX-halfHorizontal,
+          originY: ringY,
+          originZ: -6,
+          cellSize: cellSize,
+          cellColor: i%2 === 0 ? [0,0,0]
+            // : i%5 === 0 ? [0,0,0]
+            // : i%7 === 0 ? [0,0,0]
+            : i%9 === 0 ? [0,0,0]
+            // : i%13 === 0 ? [0,0,0]
+            : i<spacer_bb[1][1] ? interpolateColor(colors[0][0],colors[0][1],pointWeightStamp)
+            : i<spacer_bb[1][2] ? interpolateColor(colors[1][0],colors[1][1],pointWeightStamp)
+            : i<spacer_bb[1][3] ? interpolateColor(colors[2][0],colors[2][1],pointWeightStamp)
+            : i<spacer_bb[1][4] ? interpolateColor(colors[0][0],colors[0][1],pointWeightStamp)
+            : i<spacer_bb[1][5] ? interpolateColor(colors[1][0],colors[1][1],pointWeightStamp)
+            : i<spacer_bb[1][6] ? interpolateColor(colors[2][0],colors[2][1],pointWeightStamp)
+            : i<spacer_bb[1][7] ? interpolateColor(colors[0][0],colors[0][1],pointWeightStamp)
+            : i<spacer_bb[1][8] ? interpolateColor(colors[1][0],colors[1][1],pointWeightStamp)
+            : i<spacer_bb[1][9] ? interpolateColor(colors[2][0],colors[2][1],pointWeightStamp)
+            : i<spacer_bb[1][10] ? interpolateColor(colors[0][0],colors[0][1],pointWeightStamp)
+            : i<spacer_bb[1][11] ? interpolateColor(colors[1][0],colors[1][1],pointWeightStamp)
+            : interpolateColor(colors[2][0],colors[2][1],pointWeightStamp)
+            // : i<spacer_bb[1][3] ? interpolateColor([255, 82, 82],[255, 179, 179],pointWeightStamp)
+            // : i<spacer_bb[1][4] ? interpolateColor([255, 215, 64],[255, 229, 127],pointWeightStamp)
+            // : interpolateColor([255, 64, 129],[255, 128, 171],pointWeightStamp)
+        })
+    })
   }
   Host.stampCells(cellBuffer)
 }
@@ -176,4 +99,140 @@ function fasterWeights(baseSpacer,terminalSpacer) {
     }
   })
   return weightsResult
+}
+
+function setFlagCell({
+  spacerPoint,
+  radiusAngleStep,
+  radiusAngleFrequency,
+  radiusLength,
+  radiusXFrequency,
+  radiusYFrequency,
+  horizontalStep,
+  originX,
+  originY,
+  originZ,
+  cellView,
+  cellIndexRef,
+  cellSize,
+  cellColor
+}) {
+  const radiusAngleBase = radiusAngleStep*spacerPoint
+  const radiusAngle = Math.PI*Math.sin(radiusAngleFrequency*radiusAngleBase)
+  const radiusX = radiusLength*Math.cos(radiusXFrequency*radiusAngle)
+  const radiusY = radiusLength*Math.sin(radiusYFrequency*radiusAngle)
+  const baseX = horizontalStep*spacerPoint+radiusX
+  const baseY = radiusY
+  setFrameCell(
+    cellView,
+    cellIndexRef.value,
+    baseX+originX,
+    baseY+originY,
+    originZ,
+    cellSize,
+    0,
+    0,
+    cellColor[0],
+    cellColor[1],
+    cellColor[2]
+  )
+  cellIndexRef.value += 1
+  setFrameCell(
+    cellView,
+    cellIndexRef.value,
+    -baseX-originX,
+    baseY+originY,
+    originZ,
+    cellSize,
+    0,
+    0,
+    cellColor[0],
+    cellColor[1],
+    cellColor[2]
+  )
+  cellIndexRef.value += 1
+  setFrameCell(
+    cellView,
+    cellIndexRef.value,
+    baseX+originX,
+    -baseY-originY,
+    originZ,
+    cellSize,
+    0,
+    0,
+    cellColor[0],
+    cellColor[1],
+    cellColor[2]
+  )
+  cellIndexRef.value += 1
+  setFrameCell(
+    cellView,
+    cellIndexRef.value,
+    -baseX-originX,
+    -baseY-originY,
+    originZ,
+    cellSize,
+    0,
+    0,
+    cellColor[0],
+    cellColor[1],
+    cellColor[2]
+  )
+  cellIndexRef.value += 1
+  setFrameCell(
+    cellView,
+    cellIndexRef.value,
+    baseY+originY,
+    baseX+originX,    
+    originZ,
+    cellSize,
+    0,
+    0,
+    cellColor[0],
+    cellColor[1],
+    cellColor[2]
+  )
+  cellIndexRef.value += 1
+  setFrameCell(
+    cellView,
+    cellIndexRef.value,
+    baseY+originY,
+    -baseX-originX,    
+    originZ,
+    cellSize,
+    0,
+    0,
+    cellColor[0],
+    cellColor[1],
+    cellColor[2]
+  )
+  cellIndexRef.value += 1
+  setFrameCell(
+    cellView,
+    cellIndexRef.value,
+    -baseY-originY,
+    baseX+originX,    
+    originZ,
+    cellSize,
+    0,
+    0,
+    cellColor[0],
+    cellColor[1],
+    cellColor[2]
+  )
+  cellIndexRef.value += 1
+  setFrameCell(
+    cellView,
+    cellIndexRef.value,
+    -baseY-originY,
+    -baseX-originX,    
+    originZ,
+    cellSize,
+    0,
+    0,
+    cellColor[0],
+    cellColor[1],
+    cellColor[2]
+  )
+  cellIndexRef.value += 1
 }
