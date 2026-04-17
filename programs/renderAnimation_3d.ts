@@ -128,6 +128,6 @@ async function encodeAnimation({
       animationName
     ]
   });
-console.log("encoding animation")
-await encodeAnimationCommand.output();
+  console.log("encoding animation")
+  await encodeAnimationCommand.output();
 }
