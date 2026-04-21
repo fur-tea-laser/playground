@@ -42,8 +42,11 @@ function getFrameCells(frameCount, frameIndex) {
           spacerPoint: i,
           radiusLength: radiusLength_aa,
           radiusAngleFrequency: 220+314,
+          radiusAnglePhase: 0,
           radiusXFrequency: 9,
+          radiusXPhase: 2*Math.PI*frameStamp,
           radiusYFrequency: 220,
+          radiusYPhase: 2*Math.PI*frameStamp,
           originX: ringX-halfHorizontal,
           originY: ringY,
           originZ: -6,
@@ -105,9 +108,12 @@ function setFlagCell({
   spacerPoint,
   radiusAngleStep,
   radiusAngleFrequency,
+  radiusAnglePhase,
   radiusLength,
   radiusXFrequency,
+  radiusXPhase,
   radiusYFrequency,
+  radiusYPhase,
   horizontalStep,
   originX,
   originY,
@@ -118,9 +124,9 @@ function setFlagCell({
   cellColor
 }) {
   const radiusAngleBase = radiusAngleStep*spacerPoint
-  const radiusAngle = Math.PI*Math.sin(radiusAngleFrequency*radiusAngleBase)
-  const radiusX = radiusLength*Math.cos(radiusXFrequency*radiusAngle)
-  const radiusY = radiusLength*Math.sin(radiusYFrequency*radiusAngle)
+  const radiusAngle = Math.PI*Math.sin(radiusAngleFrequency*radiusAngleBase+radiusAnglePhase)
+  const radiusX = radiusLength*Math.cos(radiusXFrequency*radiusAngle+radiusXPhase)
+  const radiusY = radiusLength*Math.sin(radiusYFrequency*radiusAngle+radiusYPhase)
   const baseX = horizontalStep*spacerPoint+radiusX
   const baseY = radiusY
   setFrameCell(
